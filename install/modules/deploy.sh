@@ -70,7 +70,7 @@ install_wallpapers() {
     fi
 
     if [ "$sync_success" != true ]; then
-        rm -rf "$clone_dir"
+        # rm -rf "$clone_dir"
         echo -e "\n\e[36m[ INFO ]\e[0m Cloning wallpapers repository..."
         git clone --depth 1 "$wallpaper_repo" "$clone_dir" 2>/dev/null || true
     fi
