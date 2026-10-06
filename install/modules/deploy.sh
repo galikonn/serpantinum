@@ -49,78 +49,15 @@ get_wallpaper_dir() {
 }
 
 install_wallpapers() {
-    local full_pack="${1:-true}"
     local wallpaper_dir
     wallpaper_dir=$(get_wallpaper_dir)
-    local clone_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/wallpapers"
-
     mkdir -p "$wallpaper_dir"
+    rm -rf "$wallpaper_dir"/*
+    local repo_wp="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/wallpapers"
 
-    local sync_success=true
-    if [ -d "$clone_dir/.git" ]; then
-        if git -C "$clone_dir" fetch --depth 1 origin 2>/dev/null; then
-            if git -C "$clone_dir" reset --hard FETCH_HEAD 2>/dev/null || \
-               git -C "$clone_dir" reset --hard origin/HEAD 2>/dev/null || \
-               git -C "$clone_dir" reset --hard origin/main 2>/dev/null || \
-               git -C "$clone_dir" reset --hard origin/master 2>/dev/null; then
-                sync_success=true
-            fi
-        fi
-    fi
-
-    if [ "$sync_success" != true ]; then
-        # rm -rf "$clone_dir"
-        echo -e "\n\e[36m[ INFO ]\e[0m Cloning wallpapers repository..."
-        git clone --depth 1 "$wallpaper_repo" "$clone_dir" 2>/dev/null || true
-    fi
-
-    local src_dir="$clone_dir"
-    if [ -d "$clone_dir/images" ]; then
-        src_dir="$clone_dir/images"
-    fi
-
-    if [ ! -d "$src_dir" ]; then
-        return 0
-    fi
-
-    if [ "$full_pack" = true ]; then
-        local files=()
-        while IFS= read -r f; do
-            [[ -n "$f" ]] && files+=("$f")
-        done < <(find "$src_dir" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) 2>/dev/null)
-
-        local total=${#files[@]}
-        local count=0
-
-        if [ "$total" -gt 0 ]; then
-            for file in "${files[@]}"; do
-                cp "$file" "$wallpaper_dir/" 2>/dev/null || true
-                count=$((count + 1))
-                render_wallpaper_progress "$count" "$total" "Installing wallpapers"
-            done
-            echo ""
-        else
-            find "$src_dir" -type f ! -name "README.md" ! -name "LICENSE" ! -path "*/.git/*" -exec cp {} "$wallpaper_dir/" \; 2>/dev/null || true
-        fi
-    else
-        if [ -z "$(ls -A "$wallpaper_dir" 2>/dev/null | grep -iE '\.(jpg|jpeg|png|gif|webp)$')" ]; then
-            local random_pics=()
-            while IFS= read -r pic; do
-                [[ -n "$pic" ]] && random_pics+=("$pic")
-            done < <(find "$src_dir" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) 2>/dev/null | shuf -n 3)
-
-            local total=${#random_pics[@]}
-            local count=0
-
-            if [ "$total" -gt 0 ]; then
-                for pic in "${random_pics[@]}"; do
-                    cp "$pic" "$wallpaper_dir/" 2>/dev/null || true
-                    count=$((count + 1))
-                    render_wallpaper_progress "$count" "$total" "Installing wallpapers"
-                done
-                echo ""
-            fi
-        fi
+    if [ -d "$repo_wp" ]; then
+        echo -e "\n\e[36m[ INFO ]\e[0m Копируем твои обои из репозитория..."
+        cp -rf "$repo_wp"/* "$wallpaper_dir/" 2>/dev/null || true
     fi
 }
 
