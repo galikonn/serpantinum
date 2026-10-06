@@ -53,11 +53,10 @@ install_wallpapers() {
     local wallpaper_dir
     wallpaper_dir=$(get_wallpaper_dir)
     local clone_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/wallpapers"
-    local clone_dir="${XDG_CACHE_HOME:-"$HOME/.cache"}/serpantinum-wallpapers"
 
     mkdir -p "$wallpaper_dir"
 
-    local sync_success=false
+    local sync_success=true
     if [ -d "$clone_dir/.git" ]; then
         if git -C "$clone_dir" fetch --depth 1 origin 2>/dev/null; then
             if git -C "$clone_dir" reset --hard FETCH_HEAD 2>/dev/null || \
